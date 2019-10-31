@@ -6,67 +6,46 @@ class PolyTreeNode
     @children = []
   end
 
-  def parent
-
-  end
-
-  def children
-
-  end
-
-  def value
-
-  end
-
   def parent=(node)
-    unless @parent.nil?
-      @parent.children.delete(self)
-    end
+    @parent.children.delete(self) unless @parent.nil?
     @parent = node
-    unless node.nil?
-      node.children << self
+    if !(@parent.nil?) && !(@parent.children.include?(self))
+      @parent.children << self
     end
   end
 
   def add_child(child_node)
-   child_node.parent = self
+    child_node.parent = self
   end
 
   def remove_child(child_node)
+    raise Error if child_node.parent.nil?    
     child_node.parent = nil
-    raise Error if !(@children.include?(child_node))
   end
 
   def dfs(target_value)
     return self if self.value == target_value
 
     self.children.each do |child|
-      node = child.dfs(target_value)
-      return node unless node.nil?
+      result =  child.dfs(target_value)
+      return result unless result.nil?
     end
-
     nil
   end
 
   def bfs(target_value)
-    array = [self]
+    queue = [self]
 
-    until array.empty?
-      node = array.shift
-      if node.value == target_value
-        return node
+    until queue.empty?
+      el = queue.shift
+      if el.value != target_value
+        el.children.each { |child| queue << child }
       else
-        array << node.children
-        array = array.flatten
+        return el
       end
     end
-    
-    nil
+
   end
 
-  def inspect
-    @value.inspect
-  end
-
-  attr_reader :parent, :value, :children
+  attr_reader :value, :parent, :children
 end
